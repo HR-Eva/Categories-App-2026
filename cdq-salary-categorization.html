@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDQ Salary Categorization</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#F3F6F5;
+    --surface:#FFFFFF;
+    --surface-alt:#EAF3F1;
+    --border:#DEE6E4;
+    --text:#1B2A28;
+    --text-muted:#63756F;
+    --teal:#0C7B7B;
+    --teal-dark:#0A6565;
+    --navy:#1F3864;
+    --pink:#CC0066;
+    --cat0:#5B6B72;
+    --cat1:#0C7B7B;
+    --cat2:#1E8E5A;
+    --cat3:#CC0066;
+    --shadow:0 1px 3px rgba(15,32,30,.08);
+    --shadow-md:0 6px 18px rgba(15,32,30,.10);
+    --radius:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1615;
+      --surface:#162220;
+      --surface-alt:#1B2B29;
+      --border:#2A3B38;
+      --text:#E9F1EF;
+      --text-muted:#93A6A1;
+      --teal:#28A69A;
+      --teal-dark:#3BC0B2;
+      --navy:#7C97C4;
+      --pink:#F0568F;
+      --cat0:#8A9AA1;
+      --cat1:#28A69A;
+      --cat2:#4CB47F;
+      --cat3:#F0568F;
+      --shadow:0 1px 3px rgba(0,0,0,.35);
+      --shadow-md:0 8px 22px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1615;
+    --surface:#162220;
+    --surface-alt:#1B2B29;
+    --border:#2A3B38;
+    --text:#E9F1EF;
+    --text-muted:#93A6A1;
+    --teal:#28A69A;
+    --teal-dark:#3BC0B2;
+    --navy:#7C97C4;
+    --pink:#F0568F;
+    --cat0:#8A9AA1;
+    --cat1:#28A69A;
+    --cat2:#4CB47F;
+    --cat3:#F0568F;
+    --shadow:0 1px 3px rgba(0,0,0,.35);
+    --shadow-md:0 8px 22px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box;}
+  [hidden], .hidden{ display:none !important; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+  }
+  h1,h2,h3,.display{ font-family:'Sora',system-ui,sans-serif; text-wrap:balance; }
+
+  .wrap{ max-width:920px; margin:0 auto; padding:0 20px 120px; }
+
+  /* HEADER */
+  .topbar{
+    background:linear-gradient(120deg,var(--navy),var(--teal-dark));
+    color:#fff;
+    padding:22px 20px 26px;
+    margin-bottom:-14px;
+  }
+  .topbar-inner{ max-width:920px; margin:0 auto; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    background:rgba(255,255,255,.14); padding:4px 10px; border-radius:20px; margin-bottom:10px;
+  }
+  .topbar h1{ font-size:22px; font-weight:700; margin:0 0 4px; color:#fff; }
+  .topbar p{ margin:0; font-size:13px; color:rgba(255,255,255,.82); max-width:560px; }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+    position:relative;
+    z-index:1;
+  }
+  .card + .card{ margin-top:16px; }
+  .section-title{ font-size:13px; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:.04em; margin:0 0 4px; }
+  .section-sub{ font-size:12px; color:var(--text-muted); margin:0 0 14px; }
+
+  .intro-card{ margin-top:16px; }
+  .intro-card p{ margin:0 0 8px; font-size:13px; }
+  .intro-card p:last-child{ margin-bottom:0; }
+  .intro-card strong{ color:var(--navy); }
+
+  /* LEGEND */
+  .legend-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  @media (max-width:760px){ .legend-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:480px){ .legend-grid{ grid-template-columns:1fr; } }
+  .legend-item{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top:4px solid var(--cat-color);
+    border-radius:var(--radius);
+    padding:14px 14px 16px;
+    box-shadow:var(--shadow);
+  }
+  .legend-badge-row{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .cat-circle{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:var(--cat-color); color:#fff; font-family:'Sora',sans-serif; font-weight:700; font-size:13px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .legend-item h3{ font-size:13px; margin:0; color:var(--text); }
+  .legend-apr{ font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; margin:0 0 6px; }
+  .legend-desc{ font-size:12px; color:var(--text-muted); line-height:1.45; margin:0; }
+
+  /* FORM */
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .field-row{ grid-template-columns:1fr; } }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; }
+  .field input[type="text"]{
+    padding:10px 12px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:13px; background:var(--surface); color:var(--text); outline:none; font-family:inherit;
+    transition:border-color .15s;
+  }
+  .field input[type="text"]:focus{ border-color:var(--teal); }
+  .field input::placeholder{ color:var(--text-muted); opacity:.7; }
+
+  .cat-picker{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:6px; }
+  @media (max-width:560px){ .cat-picker{ grid-template-columns:1fr 1fr; } }
+  .cat-btn{
+    border:1.5px solid var(--border); background:var(--surface); color:var(--text);
+    border-radius:8px; padding:10px 8px; cursor:pointer; text-align:left;
+    font-family:'Inter',sans-serif; transition:all .15s;
+  }
+  .cat-btn:hover{ border-color:var(--cat-color); }
+  .cat-btn .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; background:var(--cat-color); color:#fff;
+    font-size:11px; font-weight:700; margin-right:6px; font-family:'Sora',sans-serif;
+  }
+  .cat-btn .cat-name{ font-size:12px; font-weight:600; display:block; margin-top:6px; }
+  .cat-btn.selected{ background:var(--cat-color); border-color:var(--cat-color); color:#fff; }
+  .cat-btn.selected .num{ background:rgba(255,255,255,.28); color:#fff; }
+
+  .conditional{ margin-top:14px; padding:12px 14px; background:var(--surface-alt); border-radius:8px; }
+  .conditional label.title{ font-size:11px; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:.03em; display:block; margin-bottom:8px; }
+  .radio-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .radio-pill{
+    border:1.5px solid var(--border); background:var(--surface); color:var(--text);
+    border-radius:20px; padding:7px 14px; font-size:12px; cursor:pointer; transition:all .15s;
+  }
+  .radio-pill:hover{ border-color:var(--pink); }
+  .radio-pill.selected{ background:var(--pink); border-color:var(--pink); color:#fff; font-weight:600; }
+
+  .form-actions{ display:flex; align-items:center; gap:10px; margin-top:16px; }
+  .btn{
+    border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:700;
+    cursor:pointer; font-family:'Inter',sans-serif; display:inline-flex; align-items:center; gap:6px;
+    transition:transform .05s, opacity .15s;
+  }
+  .btn:active{ transform:scale(.98); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-primary{ background:var(--teal); color:#fff; }
+  .btn-primary:hover:not(:disabled){ background:var(--teal-dark); }
+  .btn-outline{ background:transparent; color:var(--teal); border:1.5px solid var(--teal); }
+  .btn-outline:hover:not(:disabled){ background:var(--surface-alt); }
+  .btn-ghost{ background:transparent; color:var(--text-muted); font-weight:600; }
+  .btn-ghost:hover{ color:var(--pink); }
+  .form-hint{ font-size:11px; color:var(--text-muted); }
+
+  /* STATS */
+  .stats-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; max-width:320px; }
+  .stat-tile{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; text-align:center; }
+  .stat-num{ font-family:'Sora',sans-serif; font-size:20px; font-weight:700; }
+  .stat-label{ font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+  .stat-tile.total .stat-num{ color:var(--navy); }
+  .stat-tile.pending .stat-num{ color:var(--pink); }
+
+  /* LIST */
+  .empty-state{ text-align:center; padding:26px 10px; color:var(--text-muted); font-size:13px; }
+  .entry-list{ display:flex; flex-direction:column; gap:8px; }
+  .entry-row{
+    padding:10px 12px;
+    border:1px solid var(--border); border-radius:9px; background:var(--surface);
+  }
+  .entry-row.pending{ border-color:var(--cat3); border-style:dashed; background:var(--surface-alt); }
+  .entry-row.expanded{ border-color:var(--teal); border-style:solid; }
+  .entry-row-top{ display:flex; align-items:center; gap:12px; }
+  .inline-panel{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); }
+  .inline-panel .cat-picker{ margin-top:0; }
+  .entry-cat{
+    width:30px; height:30px; border-radius:50%; flex-shrink:0; color:#fff; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-family:'Sora',sans-serif; font-size:13px;
+  }
+  .entry-cat.pending{ background:transparent; border:1.5px dashed var(--text-muted); color:var(--text-muted); }
+  .entry-main{ flex:1; min-width:0; }
+  .entry-name{ font-weight:600; font-size:13px; }
+  .entry-detail{ font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .entry-detail.pending-label{ color:var(--pink); font-weight:600; }
+  .btn-categorize{
+    border:1.5px solid var(--pink); background:transparent; color:var(--pink); font-weight:700;
+    border-radius:7px; padding:6px 12px; font-size:11.5px; cursor:pointer; flex-shrink:0; font-family:'Inter',sans-serif;
+  }
+  .btn-categorize:hover{ background:var(--pink); color:#fff; }
+  .entry-actions{ display:flex; gap:4px; flex-shrink:0; }
+  .icon-btn{
+    border:none; background:transparent; color:var(--text-muted); cursor:pointer;
+    width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition:background .15s;
+  }
+  .icon-btn:hover{ background:var(--surface-alt); color:var(--text); }
+  .icon-btn.danger:hover{ color:var(--pink); }
+
+  .icon-btn.confirm{ width:auto; padding:0 9px; font-size:10px; font-weight:700; color:#fff; background:var(--pink); }
+  .icon-btn.confirm:hover{ background:var(--pink); color:#fff; }
+
+  .readonly-banner{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface-alt); border:1px solid var(--cat3); border-radius:8px;
+    padding:10px 14px; margin-bottom:16px; font-size:12.5px; color:var(--text);
+  }
+  .private-note{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,.82);
+    margin-top:10px;
+  }
+
+  /* EXPORT BAR */
+  .export-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:var(--surface); border-top:1px solid var(--border); box-shadow:0 -4px 16px rgba(0,0,0,.08);
+    padding:12px 20px;
+  }
+  .export-inner{
+    max-width:920px; margin:0 auto; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .export-count{ font-size:12px; color:var(--text-muted); flex:1; min-width:160px; }
+  .export-count strong{ color:var(--text); font-size:13px; }
+  .export-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .export-note{ width:100%; font-size:10.5px; color:var(--text-muted); margin-top:4px; }
+
+  .toast{
+    position:fixed; bottom:86px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--navy); color:#fff; padding:10px 18px; border-radius:8px; font-size:12.5px;
+    box-shadow:var(--shadow-md); opacity:0; pointer-events:none; transition:all .25s; z-index:60; max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .footnote{ font-size:11px; color:var(--text-muted); text-align:center; margin:22px 0 0; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="eyebrow">Budget check-in · October 2026</span>
+    <h1>Salary Categorization</h1>
+    <p>A quick, high-level pass ahead of the year-end Annual Performance Review — just enough to plan the salary-adjustment budget. No detailed ratings needed here.</p>
+    <span class="private-note">🔒 This link is private to you — your entries save here automatically.</span>
+  </div>
+</div>
+
+<div class="wrap" id="mainWrap">
+
+  <div id="readOnlyBanner" class="readonly-banner hidden">This link is currently read-only for you — ask the person who sent it to enable editing. In the meantime, use the export options at the bottom to send your list by email.</div>
+
+  <div class="card intro-card">
+    <p>Your direct reports are already listed below. For each one, pick the category that best matches where their salary adjustment will likely land. This takes about a minute per person — <strong>the full APR with individual ratings and written comments still follows at year-end.</strong></p>
+    <p>Categories map onto the same rating scale as the APR tool, just without the detail. Anyone missing from the list can be added at the bottom.</p>
+  </div>
+
+  <div class="legend-grid" id="legendGrid"></div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="section-title">Your details</div>
+    <div class="section-sub">Included with every entry so HR knows whose budget this is.</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Manager name <span style="color:var(--pink)">*</span></label>
+        <input type="text" id="managerInput" placeholder="First Last">
+      </div>
+      <div class="field">
+        <label>Department / team</label>
+        <input type="text" id="departmentInput" placeholder="e.g. Customer Success">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Your team</div>
+    <div class="section-sub">Dashed rows still need a category.</div>
+    <div class="stats-row" id="statsRow"></div>
+    <div id="listArea"></div>
+  </div>
+
+  <div class="card" id="addCard">
+    <div class="section-title" id="formTitle">Add a team member</div>
+    <div class="section-sub">Use this to add someone who isn't in your list above yet. To categorize someone already listed, click "Categorize" on their row instead.</div>
+
+    <div class="field-row" style="grid-template-columns:1fr;">
+      <div class="field">
+        <label>Employee name <span style="color:var(--pink)">*</span></label>
+        <input type="text" id="employeeInput" placeholder="First Last">
+      </div>
+    </div>
+
+    <div class="field-row" style="margin-top:14px;">
+      <div class="field">
+        <label>Role (optional)</label>
+        <input type="text" id="roleInput" placeholder="e.g. HR Manager">
+      </div>
+      <div class="field">
+        <label>Level (optional)</label>
+        <input type="text" id="levelInput" placeholder="e.g. Professional">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label>Category <span style="color:var(--pink)">*</span></label>
+      <div class="cat-picker" id="catPicker"></div>
+    </div>
+
+    <div id="conditionalArea"></div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="addBtn" disabled>Add to team</button>
+      <span class="form-hint" id="formHint"></span>
+    </div>
+  </div>
+
+</div>
+
+<div class="export-bar" id="exportBar">
+  <div class="export-inner">
+    <div class="export-count" id="exportCount"><strong>0</strong> team members categorized</div>
+    <div class="export-actions">
+      <button class="btn btn-outline" id="copyBtn">Copy to clipboard</button>
+      <button class="btn btn-primary" id="downloadBtn">Download CSV</button>
+    </div>
+    <div class="export-note" id="exportNote">Changes save automatically to this page as you go — nothing to download or email.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script id="seedData" type="application/json">{"manager":"","department":"","entries":[],"lastSavedAt":null}</script>
+<script>
+(function(){
+  "use strict";
+
+  /* Capture the page's own canonical source BEFORE any DOM mutation happens below,
+     so a later self-publish can reconstruct a complete, standalone document.
+     Queried defensively (by fingerprint, not just "the first match") in case the
+     hosting shell injects its own extra <title>/<link>/<style> tags. */
+  var TITLE_TAG = '<title>CDQ Salary Categorization</title>';
+  var FONT_LINK = '';
+  Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function(el){
+    if(!FONT_LINK && (el.getAttribute('href') || '').indexOf('fonts.googleapis.com') !== -1) FONT_LINK = el.outerHTML;
+  });
+  var STYLE_TAG = '';
+  Array.prototype.forEach.call(document.querySelectorAll('style'), function(el){
+    if(!STYLE_TAG && el.textContent.indexOf('--teal') !== -1) STYLE_TAG = el.outerHTML;
+  });
+  if(!STYLE_TAG){
+    var anyStyle = document.querySelector('style');
+    if(anyStyle) STYLE_TAG = anyStyle.outerHTML;
+  }
+  var SELF_SCRIPT_SRC = document.currentScript ? document.currentScript.textContent : '';
+  var STATIC_SKELETON = Array.prototype.filter.call(document.body.children, function(el){
+      var tag = el.tagName;
+      if(tag === 'SCRIPT' || tag === 'TITLE') return false;
+      if(tag === 'LINK' && (el.getAttribute('rel') || '').indexOf('stylesheet') !== -1) return false;
+      if(tag === 'STYLE' && el.textContent.indexOf('--teal') !== -1) return false;
+      return true;
+    })
+    .map(function(el){ return el.outerHTML; }).join('\n');
+
+  var CATEGORIES = [
+    { id:0, color:'var(--cat0)', label:'', apr:'New Joiner or Low Performer',
+      desc:'' },
+    { id:1, color:'var(--cat1)', label:'Small Adjustment', apr:'Meets Expectations',
+      desc:'Performs in line with expectations.' },
+    { id:2, color:'var(--cat2)', label:'Medium Adjustment', apr:'Exceeds Expectations',
+      desc:'Significantly exceeds expectations.' },
+    { id:3, color:'var(--cat3)', label:'Out-of-Range Adjustment', apr:'New Role or New Responsibilities',
+      desc:'Takes on a new role or responsibility and now falls into a different benchmark.' }
+  ];
+
+  var CAT0_REASONS = [
+    { id:'below', label:'Below-expectation performance' },
+    { id:'newHire', label:'Joined this year — no benchmark yet' }
+  ];
+
+  var LS_KEY = 'cdq_salary_cat_draft_v1';
+  var addCategory = null;
+  var addSubReason = null;
+  var expandedId = null;
+  var inlineCategory = null;
+  var inlineSubReason = null;
+  var pendingDeleteId = null;
+  var pendingDeleteTimer = null;
+  var toastTimer = null;
+  var isReadOnly = false;
+
+  function $(id){ return document.getElementById(id); }
+  function escapeHtml(s){
+    return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function readSeed(){
+    try{
+      var el = document.getElementById('seedData');
+      if(el){
+        var parsed = JSON.parse(el.textContent);
+        if(parsed && typeof parsed === 'object'){
+          return { manager: parsed.manager || '', department: parsed.department || '',
+            entries: Array.isArray(parsed.entries) ? parsed.entries : [], lastSavedAt: parsed.lastSavedAt || null };
+        }
+      }
+    }catch(e){}
+    return { manager:'', department:'', entries:[], lastSavedAt:null };
+  }
+
+  var state = readSeed();
+  if(!state.entries.length && !state.manager){
+    try{
+      var rawDraft = localStorage.getItem(LS_KEY);
+      if(rawDraft){
+        var parsedDraft = JSON.parse(rawDraft);
+        if(parsedDraft && Array.isArray(parsedDraft.entries) && parsedDraft.entries.length){ state = parsedDraft; }
+      }
+    }catch(e){}
+  }
+
+  function persistLocalFallback(){
+    try{
+      if(!state) return;
+      localStorage.setItem(LS_KEY, JSON.stringify({ manager: state.manager, department: state.department, entries: state.entries }));
+    }catch(e){}
+  }
+
+  function showToast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 4200);
+  }
+
+  /* ---------- LEGEND ---------- */
+  function renderLegend(){
+    var html = CATEGORIES.map(function(c){
+      var heading = c.label || c.apr;
+      var aprLine = c.label ? '<div class="legend-apr">' + escapeHtml(c.apr) + '</div>' : '';
+      return '<div class="legend-item" style="--cat-color:' + c.color + '">' +
+        '<div class="legend-badge-row"><div class="cat-circle">' + c.id + '</div><h3>' + escapeHtml(heading) + '</h3></div>' +
+        aprLine +
+        '<div class="legend-desc">' + escapeHtml(c.desc) + '</div>' +
+      '</div>';
+    }).join('');
+    $('legendGrid').innerHTML = html;
+  }
+
+  /* ---------- SHARED CATEGORY-PICKER MARKUP (used by the "add new person" form and the inline per-row picker) ---------- */
+  function catButtonsHtml(selectedId){
+    return CATEGORIES.map(function(c){
+      var sel = selectedId === c.id ? ' selected' : '';
+      var nameSpan = c.label ? '<span class="cat-name">' + escapeHtml(c.label) + '</span>' : '';
+      return '<button type="button" class="cat-btn' + sel + '" style="--cat-color:' + c.color + '" data-cat="' + c.id + '">' +
+        '<span class="num">' + c.id + '</span>' + escapeHtml(c.apr) +
+        nameSpan +
+      '</button>';
+    }).join('');
+  }
+  function conditionalHtml(categoryId, subReason){
+    if(categoryId === 0){
+      var pills = CAT0_REASONS.map(function(r){
+        var sel = subReason === r.id ? ' selected' : '';
+        return '<button type="button" class="radio-pill' + sel + '" data-reason="' + r.id + '">' + escapeHtml(r.label) + '</button>';
+      }).join('');
+      return '<div class="conditional"><label class="title">Why category 0?</label><div class="radio-pills">' + pills + '</div></div>';
+    } else if(categoryId === 2){
+      return '<div class="conditional"><label class="title">Why do they exceed expectations? (short)</label>' +
+        '<input type="text" class="text-reason-input" placeholder="e.g. consistently exceeds targets, took on additional scope" ' +
+        'style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;background:var(--surface);color:var(--text);font-family:inherit;" value="' + escapeHtml(subReason || '') + '"></div>';
+    } else if(categoryId === 3){
+      return '<div class="conditional"><label class="title">New role / responsibility (short)</label>' +
+        '<input type="text" class="text-reason-input" placeholder="e.g. moving into Team Lead Customer Success" ' +
+        'style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;background:var(--surface);color:var(--text);font-family:inherit;" value="' + escapeHtml(subReason || '') + '"></div>';
+    }
+    return '';
+  }
+
+  /* ---------- ADD-NEW-PERSON FORM (top card — only for someone not already in the list) ---------- */
+  function renderAddCatPicker(){
+    $('catPicker').innerHTML = catButtonsHtml(addCategory);
+    Array.prototype.forEach.call($('catPicker').querySelectorAll('.cat-btn'), function(btn){
+      btn.addEventListener('click', function(){
+        if(isReadOnly) return;
+        addCategory = parseInt(btn.getAttribute('data-cat'), 10);
+        addSubReason = null;
+        renderAddCatPicker();
+        renderAddConditional();
+        updateAddButton();
+      });
+    });
+  }
+
+  function renderAddConditional(){
+    var area = $('conditionalArea');
+    area.innerHTML = conditionalHtml(addCategory, addSubReason);
+    if(addCategory === 0){
+      Array.prototype.forEach.call(area.querySelectorAll('.radio-pill'), function(btn){
+        btn.addEventListener('click', function(){
+          if(isReadOnly) return;
+          addSubReason = btn.getAttribute('data-reason');
+          renderAddConditional();
+          updateAddButton();
+        });
+      });
+    } else if(addCategory === 2 || addCategory === 3){
+      var input = area.querySelector('.text-reason-input');
+      input.addEventListener('input', function(){
+        addSubReason = input.value;
+        updateAddButton();
+      });
+    }
+  }
+
+  function isAddFormValid(){
+    var name = $('employeeInput').value.trim();
+    if(!name) return false;
+    if(addCategory === null || addCategory === undefined) return false;
+    if(addCategory === 0 && !addSubReason) return false;
+    if((addCategory === 2 || addCategory === 3) && !(addSubReason && addSubReason.trim())) return false;
+    return true;
+  }
+  function updateAddButton(){
+    $('addBtn').disabled = !isAddFormValid() || isReadOnly;
+  }
+
+  function resetAddForm(){
+    $('employeeInput').value = '';
+    $('roleInput').value = '';
+    $('levelInput').value = '';
+    addCategory = null;
+    addSubReason = null;
+    renderAddCatPicker();
+    renderAddConditional();
+    updateAddButton();
+  }
+
+  function addNewEntry(){
+    if(isReadOnly || !isAddFormValid()) return;
+    var name = $('employeeInput').value.trim();
+    var role = $('roleInput').value.trim();
+    var level = $('levelInput').value.trim();
+    var entry = {
+      id: uid(),
+      name: name,
+      role: role || null,
+      level: level || null,
+      category: addCategory,
+      subReason: addCategory === 0 ? addSubReason : ((addCategory === 2 || addCategory === 3) ? addSubReason.trim() : null)
+    };
+    state.entries.push(entry);
+    showToast('Added ' + name + '.');
+    resetAddForm();
+    renderAll();
+    saveEverywhere();
+    $('employeeInput').focus();
+  }
+
+  /* ---------- INLINE CATEGORIZATION — pick the category directly on each team member's row ---------- */
+  function toggleInline(id){
+    if(isReadOnly) return;
+    var opening = expandedId !== id;
+    if(expandedId === id){
+      expandedId = null;
+    } else {
+      var e = state.entries.find(function(x){ return x.id === id; });
+      if(!e) return;
+      expandedId = id;
+      inlineCategory = (e.category === null || e.category === undefined) ? null : e.category;
+      inlineSubReason = e.subReason;
+    }
+    renderList();
+    if(opening){
+      var row = document.querySelector('[data-row="' + id + '"]');
+      if(row) row.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+
+  function isInlineValid(){
+    if(inlineCategory === null || inlineCategory === undefined) return false;
+    if(inlineCategory === 0 && !inlineSubReason) return false;
+    if((inlineCategory === 2 || inlineCategory === 3) && !(inlineSubReason && inlineSubReason.trim())) return false;
+    return true;
+  }
+
+  function renderInlinePanel(e){
+    var secondaryLabel = isPending(e) ? 'Cancel' : 'Remove category';
+    return '<div class="inline-panel">' +
+      '<div class="cat-picker">' + catButtonsHtml(inlineCategory) + '</div>' +
+      '<div class="inline-conditional">' + conditionalHtml(inlineCategory, inlineSubReason) + '</div>' +
+      '<div class="form-actions">' +
+        '<button type="button" class="btn btn-primary" data-save="' + e.id + '"' + (isInlineValid() ? '' : ' disabled') + '>Save category</button>' +
+        '<button type="button" class="btn btn-ghost" data-cancel="' + e.id + '">' + secondaryLabel + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function wireInlinePanel(container, e){
+    var panel = container.querySelector('.inline-panel');
+    if(!panel) return;
+    Array.prototype.forEach.call(panel.querySelectorAll('.cat-btn'), function(btn){
+      btn.addEventListener('click', function(){
+        inlineCategory = parseInt(btn.getAttribute('data-cat'), 10);
+        inlineSubReason = null;
+        renderList();
+      });
+    });
+    var condArea = panel.querySelector('.inline-conditional');
+    if(inlineCategory === 0){
+      Array.prototype.forEach.call(condArea.querySelectorAll('.radio-pill'), function(btn){
+        btn.addEventListener('click', function(){
+          inlineSubReason = btn.getAttribute('data-reason');
+          renderList();
+        });
+      });
+    } else if(inlineCategory === 2 || inlineCategory === 3){
+      var input = condArea.querySelector('.text-reason-input');
+      if(input){
+        input.addEventListener('input', function(){
+          inlineSubReason = input.value;
+          var saveBtn = panel.querySelector('[data-save]');
+          if(saveBtn) saveBtn.disabled = !isInlineValid();
+        });
+      }
+    }
+    var saveBtn = panel.querySelector('[data-save]');
+    if(saveBtn) saveBtn.addEventListener('click', function(){ saveInline(e.id); });
+    var cancelBtn = panel.querySelector('[data-cancel]');
+    if(cancelBtn) cancelBtn.addEventListener('click', function(){
+      if(isPending(e)){
+        expandedId = null;
+        renderList();
+      } else {
+        removeCategory(e.id);
+      }
+    });
+  }
+
+  function removeCategory(id){
+    if(isReadOnly) return;
+    var idx = state.entries.findIndex(function(x){ return x.id === id; });
+    if(idx === -1) return;
+    var e = state.entries[idx];
+    e.category = null;
+    e.subReason = null;
+    expandedId = null;
+    showToast('Removed category for ' + e.name + '.');
+    renderAll();
+    saveEverywhere();
+  }
+
+  function saveInline(id){
+    if(isReadOnly || !isInlineValid()) return;
+    var idx = state.entries.findIndex(function(x){ return x.id === id; });
+    if(idx === -1) return;
+    var e = state.entries[idx];
+    e.category = inlineCategory;
+    e.subReason = inlineCategory === 0 ? inlineSubReason : ((inlineCategory === 2 || inlineCategory === 3) ? inlineSubReason.trim() : null);
+    expandedId = null;
+    showToast('Updated ' + e.name + '.');
+    renderAll();
+    saveEverywhere();
+  }
+
+  function requestDelete(id){
+    if(isReadOnly) return;
+    if(pendingDeleteId === id){
+      if(pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+      pendingDeleteId = null;
+      performDelete(id);
+    } else {
+      pendingDeleteId = id;
+      if(pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+      pendingDeleteTimer = setTimeout(function(){ pendingDeleteId = null; renderList(); }, 4000);
+      renderList();
+    }
+  }
+
+  function performDelete(id){
+    var idx = state.entries.findIndex(function(e){ return e.id === id; });
+    if(idx === -1) return;
+    var removedName = state.entries[idx].name;
+    state.entries.splice(idx, 1);
+    if(expandedId === id) expandedId = null;
+    renderAll();
+    saveEverywhere();
+    showToast('Removed ' + removedName + '.');
+  }
+
+  function catById(id){ return CATEGORIES[id]; }
+
+  function detailForEntry(e){
+    if(e.category === 0){
+      var r = CAT0_REASONS.find(function(x){ return x.id === e.subReason; });
+      return r ? r.label : '';
+    }
+    if(e.category === 2 || e.category === 3){ return e.subReason || ''; }
+    return '';
+  }
+
+  function isPending(e){ return e.category === null || e.category === undefined; }
+
+  function renderStats(){
+    var pendingCount = 0;
+    state.entries.forEach(function(e){ if(isPending(e)) pendingCount++; });
+    var tiles = '<div class="stat-tile total"><div class="stat-num">' + state.entries.length + '</div><div class="stat-label">Total</div></div>';
+    tiles += '<div class="stat-tile pending"><div class="stat-num">' + pendingCount + '</div><div class="stat-label">Pending</div></div>';
+    $('statsRow').innerHTML = tiles;
+    var doneCount = state.entries.length - pendingCount;
+    $('exportCount').innerHTML = '<strong>' + doneCount + '</strong> of ' + state.entries.length + ' team member' + (state.entries.length===1?'':'s') + ' categorized';
+  }
+
+  function renderList(){
+    var area = $('listArea');
+    if(!state.entries.length){
+      area.innerHTML = '<div class="empty-state">No team members added yet — add your first one above.</div>';
+      return;
+    }
+    var html = '<div class="entry-list">';
+    state.entries.forEach(function(e){
+      var pending = isPending(e);
+      var expanded = expandedId === e.id;
+      var c = pending ? null : catById(e.category);
+      var detail = pending ? '' : detailForEntry(e);
+      var confirming = pendingDeleteId === e.id;
+      var roleLine = [e.role, e.level].filter(Boolean).join(' · ');
+      var catLine = pending ? '<span class="entry-detail pending-label">Not yet categorized</span>' :
+        '<span class="entry-detail">' + escapeHtml(c.label) + (detail ? ' · ' + escapeHtml(detail) : '') + '</span>';
+      html += '<div class="entry-row' + (pending ? ' pending' : '') + (expanded ? ' expanded' : '') + '" data-row="' + e.id + '">' +
+        '<div class="entry-row-top">' +
+          '<div class="entry-cat' + (pending ? ' pending' : '') + '"' + (pending ? '' : ' style="background:' + c.color + '"') + '>' + (pending ? '?' : e.category) + '</div>' +
+          '<div class="entry-main"><div class="entry-name">' + escapeHtml(e.name) + '</div>' +
+          (roleLine ? '<div class="entry-detail">' + escapeHtml(roleLine) + '</div>' : '') +
+          '<div>' + catLine + '</div></div>' +
+          '<div class="entry-actions">' +
+            (pending ? '<button type="button" class="btn-categorize" data-toggle="' + e.id + '"' + (isReadOnly?' disabled':'') + '>' + (expanded ? 'Close' : 'Categorize') + '</button>' :
+              '<button type="button" class="icon-btn" title="Change category" data-toggle="' + e.id + '"' + (isReadOnly?' disabled':'') + '>✎</button>') +
+            '<button type="button" class="icon-btn danger' + (confirming?' confirm':'') + '" title="Remove" data-del="' + e.id + '"' + (isReadOnly?' disabled':'') + '>' + (confirming ? 'Confirm?' : '✕') + '</button>' +
+          '</div>' +
+        '</div>' +
+        (expanded ? renderInlinePanel(e) : '') +
+      '</div>';
+    });
+    html += '</div>';
+    area.innerHTML = html;
+    Array.prototype.forEach.call(area.querySelectorAll('[data-toggle]'), function(btn){
+      btn.addEventListener('click', function(){ toggleInline(btn.getAttribute('data-toggle')); });
+    });
+    Array.prototype.forEach.call(area.querySelectorAll('[data-del]'), function(btn){
+      btn.addEventListener('click', function(){ requestDelete(btn.getAttribute('data-del')); });
+    });
+    if(expandedId){
+      var expandedRow = area.querySelector('[data-row="' + expandedId + '"]');
+      var expandedEntry = state.entries.find(function(x){ return x.id === expandedId; });
+      if(expandedRow && expandedEntry) wireInlinePanel(expandedRow, expandedEntry);
+    }
+  }
+
+  function renderAll(){
+    renderStats();
+    renderList();
+  }
+
+  /* ---------- EXPORT ---------- */
+  function csvEscape(v){
+    v = (v == null ? '' : String(v));
+    if(/[",\r\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }
+  function buildCSV(){
+    var rows = [['Manager','Department','Employee','Role','Level','Category','Category Label','Detail','Date']];
+    var dateStr = new Date().toISOString().slice(0,10);
+    state.entries.forEach(function(e){
+      var pending = isPending(e);
+      var c = pending ? null : catById(e.category);
+      rows.push([state.manager, state.department, e.name, e.role || '', e.level || '',
+        pending ? '' : String(e.category), pending ? 'Not yet categorized' : c.label,
+        pending ? '' : detailForEntry(e), dateStr]);
+    });
+    return rows.map(function(r){ return r.map(csvEscape).join(','); }).join('\r\n');
+  }
+  function sanitizeFilename(s){
+    var out = (s || '').trim().replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0,40);
+    return out || 'Manager';
+  }
+
+  var downloadsCap = null;
+  var artifactCap = null;
+  (function initCapability(){
+    try{
+      if(window.claude && typeof window.claude.use === 'function'){
+        window.claude.use('downloads').then(function(d){ downloadsCap = d; }).catch(function(){});
+        window.claude.use('artifact').then(function(a){ artifactCap = a; }).catch(function(){});
+      }
+    }catch(e){}
+  })();
+
+  /* ---------- SELF-PUBLISH (durable save, no login required) ---------- */
+  function buildFullDocument(){
+    var snapshot = { manager: state.manager, department: state.department, entries: state.entries, lastSavedAt: new Date().toISOString() };
+    var seedJson = JSON.stringify(snapshot).replace(/</g, '\\u003c');
+    return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+      + TITLE_TAG + '\n' + FONT_LINK + '\n' + STYLE_TAG + '\n</head>\n<body>\n'
+      + STATIC_SKELETON
+      + '\n<script id="seedData" type="application/json">' + seedJson + '<' + '/script>\n'
+      + '<script>' + SELF_SCRIPT_SRC + '<' + '/script>\n'
+      + '</body>\n</html>';
+  }
+
+  function setSavedIndicator(text){
+    var el = $('exportNote');
+    if(el) el.textContent = text;
+  }
+
+  function renderReadOnlyBanner(){
+    var el = $('readOnlyBanner');
+    if(!el) return;
+    if(isReadOnly) el.classList.remove('hidden'); else el.classList.add('hidden');
+  }
+
+  async function persistState(){
+    if(isReadOnly) return;
+    if(!artifactCap){
+      setSavedIndicator('Saved to this browser only — this link can\'t auto-save right now. Use Export below as a backup.');
+      return;
+    }
+    try{
+      state.lastSavedAt = new Date().toISOString();
+      var doc = buildFullDocument();
+      await artifactCap.publish(doc);
+      setSavedIndicator('Saved · ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+    }catch(err){
+      var code = err && err.code;
+      if(code === 'not_writer' || code === 'not_granted' || code === 'consent_required'){
+        isReadOnly = true;
+        renderReadOnlyBanner();
+        renderList();
+        updateAddButton();
+        setSavedIndicator('Not saved centrally — this link is read-only. Use Export below.');
+        showToast('This link is read-only for you — use Export below instead.');
+      } else if(code === 'conflict'){
+        // the platform reloads every open view to the winning version — nothing else to do
+      } else if(code === 'rate_limited'){
+        showToast('Saving too fast — please wait a moment and try again.');
+      } else {
+        setSavedIndicator('Could not save automatically. Use Export below as a backup.');
+      }
+    }
+  }
+
+  function saveEverywhere(){
+    persistLocalFallback();
+    persistState();
+  }
+
+  function requireEntries(){
+    if(!state.entries.length){
+      showToast('Add at least one team member first.');
+      return false;
+    }
+    return true;
+  }
+
+  async function copyCSV(isFallback){
+    var csv = buildCSV();
+    try{
+      await navigator.clipboard.writeText(csv);
+      showToast(isFallback ? 'Download isn’t available here — copied the data instead. Paste it into an email or spreadsheet.' : 'Copied to clipboard.');
+    }catch(err){
+      showToast('Could not copy automatically. Please select and copy the list manually.');
+    }
+  }
+
+  async function exportCSV(){
+    if(!requireEntries()) return;
+    var csv = buildCSV();
+    var filename = 'CDQ_Salary_Categorization_' + sanitizeFilename(state.manager) + '_' + new Date().toISOString().slice(0,10) + '.csv';
+    if(downloadsCap){
+      try{
+        await downloadsCap.save({ filename: filename, data: csv });
+        showToast('Downloaded — please email the file to HR.');
+        return;
+      }catch(err){
+        if(err && err.code === 'declined') return;
+      }
+    }
+    copyCSV(true);
+  }
+
+  /* ---------- WIRE UP ---------- */
+  renderLegend();
+  $('managerInput').value = state.manager || '';
+  $('departmentInput').value = state.department || '';
+  renderAddCatPicker();
+  renderAddConditional();
+  renderAll();
+  updateAddButton();
+  renderReadOnlyBanner();
+  if(state.lastSavedAt){
+    setSavedIndicator('Saved · ' + new Date(state.lastSavedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+  }
+
+  $('managerInput').addEventListener('input', function(){ state.manager = this.value; persistLocalFallback(); });
+  $('managerInput').addEventListener('change', function(){ saveEverywhere(); });
+  $('departmentInput').addEventListener('input', function(){ state.department = this.value; persistLocalFallback(); });
+  $('departmentInput').addEventListener('change', function(){ saveEverywhere(); });
+  $('employeeInput').addEventListener('input', updateAddButton);
+  $('addBtn').addEventListener('click', addNewEntry);
+  $('copyBtn').addEventListener('click', function(){ if(requireEntries()) copyCSV(false); });
+  $('downloadBtn').addEventListener('click', exportCSV);
+
+})();
+</script>
+
+</body>
+</html>
